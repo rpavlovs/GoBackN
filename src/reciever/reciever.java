@@ -14,42 +14,52 @@ import java.util.Queue;
 public class receiver {
 
 	
-	InetAddress networkEmulatorHostName;
+	InetAddress networkEmulatorAddr;
 	int networkEmulatorACKPort;
 	int N = 10;
 	int maxDataLength = 500;
 	int ACKsize;
 	int ACKSeqExpected = 0;
-	Queue<packet> packetsToReceive = new LinkedList<packet>();
+	Queue<packet> packetsWindow = new LinkedList<packet>();
+	Queue<packet> packetsReceived = new LinkedList<packet>();
 	DatagramSocket receiverSocket;
 	
-	receiver(String networkEmulatorHostName, int networkEmulatorACKPort, int receiverPort) {
+	receiver(String networkEmulatorAddr, int networkEmulatorACKPort, int receiverPort) {
 		try {
-			this.networkEmulatorHostName = InetAddress.getHostName(networkEmulatorHostName);
+			this.networkEmulatorAddr = InetAddress.getByName(networkEmulatorAddr);
 			this.receiverSocket = new DatagramSocket(receiverPort);
 			ACKsize = packet.createACK(0).getUDPdata().length;
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 		}
-		this.networkEmulatorACKPort = networkEmulatorPort;
+		this.networkEmulatorACKPort = networkEmulatorACKPort;
 	}
 	
 	
 	
 	
-	public void receive(String fileName
+	public void receive(String fileName) throws Exception {
+	
+	while(packetsReceived.size() != 0 && packetsWindow.size() != 0) {
+		receivePackets();
+		sendACK();
+	}
+	
+	
+	}
 	
 	
 	
 	
-	void receivePacket() throws IOException {
+	void receivePackets() throws IOException {
 		
+		byte[] receiveData = 
 	}
 	
 	
 	
 	
-	void sendAck() throws Exception {
+	void sendACK() throws Exception {
 		
 	}
 	
