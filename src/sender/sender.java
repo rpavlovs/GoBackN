@@ -21,12 +21,15 @@ public class sender {
 	Queue<packet> packetsWindow = new LinkedList<packet>();
 	Queue<packet> packetsToSend = new LinkedList<packet>();
 	DatagramSocket senderSocket;
+	MyLogger seqNumLog, ACKLog;
 
 	sender(String networkEmulatorAddr, int networkEmulatorPort,	int senderACKPort) {
 		try {
 			this.networkEmulatorAddr = InetAddress.getByName(networkEmulatorAddr);
 			this.senderSocket  = new DatagramSocket(senderACKPort);
 			ACKsize = packet.createACK(0).getUDPdata().length;
+			seqNumLog = new MyLogger("seqnum.log", "Sequence number log");
+			ACKLog = new MyLogger("ack.log", "Acknowlegement log");
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 		}
@@ -80,7 +83,7 @@ public class sender {
 		
 		// Send all packet in packet window through UPD
 		for (packet p : packetsWindow) {
-			logSeqNum(p.getSeqNum());
+			seqNumLog.write( Integer.toString(p.getSeqNum()) );
 			byte[] sendData = p.getUDPdata();
 			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, 
 					networkEmulatorAddr, networkEmulatorPort);
@@ -95,19 +98,11 @@ public class sender {
 		while( !timer.isExpired() ) {
 			senderSocket.receive(recievePacket);
 			packet ack = packet.parseUDPdata(recievePacket.getData());
-			logACK(ack.getSeqNum());
+			ACKLog.write( Integer.toString(ack.getSeqNum()) );
 			if(ack.getSeqNum() == packetsWindow.peek().getSeqNum()) {
 				packetsWindow.poll();
 			}
 		}
-	}
-	
-	void logSeqNum(int seqNum) {
-		System.out.println("Sending: " + seqNum);
-	}
-	
-	void logACK(int seqNum) {
-		System.out.println("ACK recieved: " + seqNum);
 	}
 
 	/**

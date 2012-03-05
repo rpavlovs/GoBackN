@@ -1,4 +1,4 @@
-package reciever;
+package receiver;
 
 // common packet class used by both SENDER and RECEIVER
 
