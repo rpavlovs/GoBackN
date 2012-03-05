@@ -53,7 +53,8 @@ public class receiver {
 	
 	void receivePackets() throws IOException {
 		
-		byte[] receiveData = 
+		byte[] receiveData = new byte[ACKsize];
+		DatagramPacket receivePacket = new DatagramPacket(receiveData, ACKsize)
 	}
 	
 	
