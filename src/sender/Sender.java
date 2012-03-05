@@ -9,7 +9,7 @@ import java.net.InetAddress;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class sender {
+public class Sender {
 
 	InetAddress networkEmulatorAddr;
 	int networkEmulatorPort;
@@ -18,16 +18,16 @@ public class sender {
 	int ACKsize;
 	int ACKSeqExpected = 0;
 	MyTimer timer = new MyTimer( new Long(10000) );
-	Queue<packet> packetsWindow = new LinkedList<packet>();
-	Queue<packet> packetsToSend = new LinkedList<packet>();
+	Queue<Packet> packetsWindow = new LinkedList<Packet>();
+	Queue<Packet> packetsToSend = new LinkedList<Packet>();
 	DatagramSocket senderSocket;
 	MyLogger seqNumLog, ACKLog;
 
-	sender(String networkEmulatorAddr, int networkEmulatorPort,	int senderACKPort) {
+	Sender(String networkEmulatorAddr, int networkEmulatorPort,	int senderACKPort) {
 		try {
 			this.networkEmulatorAddr = InetAddress.getByName(networkEmulatorAddr);
 			this.senderSocket  = new DatagramSocket(senderACKPort);
-			ACKsize = packet.createACK(0).getUDPdata().length;
+			ACKsize = Packet.createACK(0).getUDPdata().length;
 			seqNumLog = new MyLogger("seqnum.log", "Sequence number log");
 			ACKLog = new MyLogger("ack.log", "Acknowlegement log");
 		} catch (Exception e) {
@@ -53,7 +53,7 @@ public class sender {
 			}
 			if(dataLength == 0) break;
 			try {
-				packetsToSend.add( packet.createPacket(seqNum, data) );
+				packetsToSend.add( Packet.createPacket(seqNum, data) );
 			} catch (Exception e) {
 				System.err.println(e.getMessage());
 			}
@@ -75,12 +75,12 @@ public class sender {
 		
 		// Fill up the packet window
 		while(packetsToSend.size() != 0 && packetsWindow.size() < N) {
-			packet nextToSend = packetsToSend.poll();
+			Packet nextToSend = packetsToSend.poll();
 			packetsWindow.add(nextToSend);
 		}
 		
 		// Send all packet in packet window through UPD
-		for (packet p : packetsWindow) {
+		for (Packet p : packetsWindow) {
 			seqNumLog.write( Integer.toString(p.getSeqNum()) );
 			byte[] sendData = p.getUDPdata();
 			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, 
@@ -95,7 +95,7 @@ public class sender {
 		DatagramPacket recievePacket = new DatagramPacket(ackUPD, ACKsize);
 		while( !timer.isExpired() ) {
 			senderSocket.receive(recievePacket);
-			packet ack = packet.parseUDPdata(recievePacket.getData());
+			Packet ack = Packet.parseUDPdata(recievePacket.getData());
 			ACKLog.write( Integer.toString(ack.getSeqNum()) );
 			if(ack.getSeqNum() == packetsWindow.peek().getSeqNum()) {
 				packetsWindow.poll();
@@ -104,7 +104,7 @@ public class sender {
 	}
 	
 	void sendEOT() throws Exception {
-		byte[] sendData = packet.createEOT(0).getUDPdata();
+		byte[] sendData = Packet.createEOT(0).getUDPdata();
 		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, 
 				networkEmulatorAddr, networkEmulatorPort);
 		senderSocket.send(sendPacket);
@@ -130,7 +130,7 @@ public class sender {
 		}
 
 		try {
-			sender s = new sender(args[0], Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+			Sender s = new Sender(args[0], Integer.parseInt(args[1]), Integer.parseInt(args[2]));
 			s.send( args[3] );
 		} catch( Exception e ) {
 			System.err.println(e.getMessage());

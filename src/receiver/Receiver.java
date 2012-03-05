@@ -9,7 +9,7 @@ import java.net.InetAddress;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class receiver {
+public class Receiver {
 
 	private final int SeqNumModulo = 32;
 	
@@ -20,15 +20,15 @@ public class receiver {
 	int maxPacketSize;
 	int seqNumExpected = 0;
 	int ACKseqNumToSend = -1;
-	Queue<packet> packetsReceived = new LinkedList<packet>();
+	Queue<Packet> packetsReceived = new LinkedList<Packet>();
 	DatagramSocket receiverSocket;
 	MyLogger arrivalLog;
 
-	receiver(String networkEmulatorAddr, int networkEmulatorACKPort, int receiverPort) {
+	Receiver(String networkEmulatorAddr, int networkEmulatorACKPort, int receiverPort) {
 		try {
 			this.networkEmulatorAddr = InetAddress.getByName(networkEmulatorAddr);
 			this.receiverSocket = new DatagramSocket(receiverPort);
-			maxPacketSize = packet.createPacket(0, new String( new char[500]) ).getUDPdata().length;
+			maxPacketSize = Packet.createPacket(0, new String( new char[500]) ).getUDPdata().length;
 			arrivalLog = new MyLogger("arrival.log", "Arrival Log");
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
@@ -43,7 +43,7 @@ public class receiver {
 		
 		while(true) {
 			receiverSocket.receive(receivedPacketUDP);
-			packet recievedPacket = packet.parseUDPdata(receivedPacketUDP.getData());
+			Packet recievedPacket = Packet.parseUDPdata(receivedPacketUDP.getData());
 			arrivalLog.write(Integer.toString(recievedPacket.getSeqNum()));
 			
 			// Break when EOT Received
@@ -58,7 +58,7 @@ public class receiver {
 			
 			// Send ACK
 			if(ACKseqNumToSend != -1) {
-				packet ack = packet.createACK(ACKseqNumToSend);
+				Packet ack = Packet.createACK(ACKseqNumToSend);
 				byte[] sendData = ack.getUDPdata();
 				DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, 
 						networkEmulatorAddr, networkEmulatorACKPort);
@@ -74,7 +74,7 @@ public class receiver {
 		FileWriter outFile = new FileWriter(fileName);
 		PrintWriter out = new PrintWriter(outFile);
 		
-		for (packet p : packetsReceived) {
+		for (Packet p : packetsReceived) {
 			out.print(p.getData());
 		}
 			
@@ -82,7 +82,7 @@ public class receiver {
 	}
 	
 	void sendEOT() throws Exception {
-		packet eot = packet.createEOT(0);
+		Packet eot = Packet.createEOT(0);
 		byte[] sendData = eot.getUDPdata();
 		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, 
 				networkEmulatorAddr, networkEmulatorACKPort);
@@ -108,7 +108,7 @@ public class receiver {
 		}
 
 		try {
-			receiver r = new receiver( args[0], Integer.parseInt(args[1]), Integer.parseInt(args[2]) );
+			Receiver r = new Receiver( args[0], Integer.parseInt(args[1]), Integer.parseInt(args[2]) );
 			r.receive( args[3] );
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
