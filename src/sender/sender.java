@@ -60,14 +60,12 @@ public class sender {
 		}
 		in.close();
 		
-		packetsToSend.add( packet.createEOT(seqNum) );
-		
 		while(packetsToSend.size() != 0 && packetsWindow.size() != 0){
 			sendPackets();
 			recieveACK();
 		}
-
 		
+		sendEOT();
 	}
 	
 	// Send/re-send all packets possible at this time
@@ -103,6 +101,13 @@ public class sender {
 				packetsWindow.poll();
 			}
 		}
+	}
+	
+	void sendEOT() throws Exception {
+		byte[] sendData = packet.createEOT(0).getUDPdata();
+		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, 
+				networkEmulatorAddr, networkEmulatorPort);
+		senderSocket.send(sendPacket);
 	}
 
 	/**

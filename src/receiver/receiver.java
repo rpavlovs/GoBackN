@@ -67,14 +67,7 @@ public class receiver {
 		}
 		
 		storePacketsToFile(fileName);
-		
-		//Send EOT back
-		packet eot = packet.createEOT(0);
-		byte[] sendData = eot.getUDPdata();
-		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, 
-				networkEmulatorAddr, networkEmulatorACKPort);
-		receiverSocket.send(sendPacket);
-
+		sendEOT();
 	}
 
 	void storePacketsToFile(String fileName) throws Exception {
@@ -86,6 +79,14 @@ public class receiver {
 		}
 			
 		out.close();
+	}
+	
+	void sendEOT() throws Exception {
+		packet eot = packet.createEOT(0);
+		byte[] sendData = eot.getUDPdata();
+		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, 
+				networkEmulatorAddr, networkEmulatorACKPort);
+		receiverSocket.send(sendPacket);
 	}
 
 	/**
