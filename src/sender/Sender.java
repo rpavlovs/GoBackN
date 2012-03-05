@@ -8,6 +8,9 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.LinkedList;
 import java.util.Queue;
+import sender.MyLogger;
+import sender.MyTimer;
+import sender.Packet;
 
 public class Sender {
 
